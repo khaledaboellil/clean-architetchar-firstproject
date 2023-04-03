@@ -1,9 +1,12 @@
+import 'package:dartz/dartz.dart';
+
+import '../../../core/error/failure.dart';
 import '../entites/posts.dart';
 
 abstract class PostRepositery {
 
-  Future<List<Post>> getAllPosts() ;
-  Future <bool> deletePost(int id );
-  Future <bool> addPost(Post post );
-  Future <bool> updatePost(Post post );
+  Future<Either<Failure,List<Post>>> getAllPosts() ;
+  Future <Either<Failure,void>> deletePost(int id );
+  Future <Either<Failure,void>> addPost(Post post );
+  Future <Either<Failure,void>> updatePost(Post post );
 }

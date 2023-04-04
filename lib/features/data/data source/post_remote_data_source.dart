@@ -1,7 +1,8 @@
 import '../../domain/entites/posts.dart';
+import '../models/post_model.dart';
 
 abstract class BasePostRemoteDataSource {
-  Future<List<Post>>getAllPosts();
+  Future<List<PostModel>>getAllPosts();
   Future<void>updatePost(Post post);
   Future<void>addPost(Post post);
   Future<void>deletePost(int id);
@@ -21,7 +22,7 @@ class PostRemoteDataSource extends BasePostRemoteDataSource{
   }
 
   @override
-  Future<List<Post>> getAllPosts() {
+  Future<List<PostModel>> getAllPosts() {
     // TODO: implement getAllPosts
     throw UnimplementedError();
   }

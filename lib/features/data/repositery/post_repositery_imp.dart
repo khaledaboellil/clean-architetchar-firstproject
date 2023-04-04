@@ -4,30 +4,97 @@ import 'package:posts/features/data/data%20source/post_remote_data_source.dart';
 import 'package:posts/features/domain/entites/posts.dart';
 import 'package:posts/features/domain/repostiry/post_repositery.dart';
 
-class PostRepoisteryImpl implements PostRepositery{
-  final PostRemoteDataSource postRemoteDataSource ;
+import '../../../core/error/exceptions.dart';
+import '../../../core/network/network_info.dart';
+import '../data source/post_local_data_source.dart';
 
-  PostRepoisteryImpl(this.postRemoteDataSource);
+class PostRepoisteryImpl implements PostRepositery{
+  final BasePostRemoteDataSource postRemoteDataSource ;
+  final BasePostLocalDataSource postLocalDataSource ;
+  final NetworkInfo networkInfo;
+  PostRepoisteryImpl(this.postRemoteDataSource,this.postLocalDataSource,this.networkInfo);
   @override
   Future<Either<Failure, List<Post>>> getAllPosts() async{
-     await postRemoteDataSource.getAllPosts();
+    if(await networkInfo.isConnected)
+      {
+        try{
+          final remotePosts = await postRemoteDataSource.getAllPosts();
+          postLocalDataSource.cachePosts(remotePosts) ;
+          return right(remotePosts) ;
+        }
+       on ServerException {
+          return left(ServerFailure()) ;
+        }
+
+      }
+    else{
+      try {
+        final localPosts = await postLocalDataSource.getCachedPosts();
+        right(localPosts);
+      }
+      on EmptyCacheException {
+        return left(EmptyCacheFailure()) ;
+      }
+    }
      throw UnimplementedError();
   }
   @override
-  Future<Either<Failure, void>> addPost(Post post) {
-  postRemoteDataSource.addPost(post);
-  throw UnimplementedError();
+  Future<Either<Failure, void>> addPost(Post post)async {
+      if(await networkInfo.isConnected)
+        {
+          try{
+            postRemoteDataSource.addPost(post);
+          }
+          on ServerException {
+            return left(ServerFailure());
+          }
+        }
+      else
+        {
+          return left(OfflineFailure());
+        }
+
+      throw UnimplementedError();
   }
 
   @override
-  Future<Either<Failure, void>> deletePost(int id) {
+  Future<Either<Failure, void>> deletePost(int id) async{
+
+    if(await networkInfo.isConnected)
+    {
+      try{
+        postRemoteDataSource.deletePost(id);
+      }
+      on ServerException {
+        return left(ServerFailure());
+      }
+    }
+    else
+    {
+      return left(OfflineFailure());
+    }
+
     throw UnimplementedError();
   }
 
 
 
   @override
-  Future<Either<Failure, void>> updatePost(Post post) {
+  Future<Either<Failure, void>> updatePost(Post post) async {
+    if(await networkInfo.isConnected)
+    {
+      try{
+        postRemoteDataSource.updatePost(post);
+      }
+      on ServerException {
+        return left(ServerFailure());
+      }
+    }
+    else
+    {
+      return left(OfflineFailure());
+    }
+
     throw UnimplementedError();
 
   }

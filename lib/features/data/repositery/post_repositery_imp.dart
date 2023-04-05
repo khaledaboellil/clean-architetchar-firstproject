@@ -40,19 +40,7 @@ class PostRepoisteryImpl implements PostRepositery{
   }
   @override
   Future<Either<Failure, void>> addPost(Post post)async {
-      if(await networkInfo.isConnected)
-        {
-          try{
-            postRemoteDataSource.addPost(post);
-          }
-          on ServerException {
-            return left(ServerFailure());
-          }
-        }
-      else
-        {
-          return left(OfflineFailure());
-        }
+      await getMessage(function: postRemoteDataSource.addPost(post));
 
       throw UnimplementedError();
   }
@@ -60,20 +48,7 @@ class PostRepoisteryImpl implements PostRepositery{
   @override
   Future<Either<Failure, void>> deletePost(int id) async{
 
-    if(await networkInfo.isConnected)
-    {
-      try{
-        postRemoteDataSource.deletePost(id);
-      }
-      on ServerException {
-        return left(ServerFailure());
-      }
-    }
-    else
-    {
-      return left(OfflineFailure());
-    }
-
+    await getMessage(function:  postRemoteDataSource.deletePost(id));
     throw UnimplementedError();
   }
 
@@ -81,10 +56,18 @@ class PostRepoisteryImpl implements PostRepositery{
 
   @override
   Future<Either<Failure, void>> updatePost(Post post) async {
+    await getMessage(function: postRemoteDataSource.updatePost(post)) ;
+    throw UnimplementedError();
+
+  }
+
+  Future<Either<Failure,void>>getMessage({
+    required function
+})async{
     if(await networkInfo.isConnected)
     {
       try{
-        postRemoteDataSource.updatePost(post);
+        function ;
       }
       on ServerException {
         return left(ServerFailure());
@@ -94,9 +77,6 @@ class PostRepoisteryImpl implements PostRepositery{
     {
       return left(OfflineFailure());
     }
-
     throw UnimplementedError();
-
   }
-
 }

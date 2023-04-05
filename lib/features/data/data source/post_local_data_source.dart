@@ -37,5 +37,4 @@ class PostLocalDataSource implements BasePostLocalDataSource{
       }
   }
 
-
 }
